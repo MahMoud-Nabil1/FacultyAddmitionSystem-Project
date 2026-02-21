@@ -15,7 +15,7 @@ const Subjects = mongoose.model('Subjects', {
     },
     creditHours: {
         type: Number,
-        requirejs: true
+        required: true
     }
 });
 
