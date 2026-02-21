@@ -1,10 +1,22 @@
 import mongoose from 'mongoose';
 
 const Subjects = mongoose.model('Subjects', {
-    id: String,
-    name: String,
-    prerequisites: Array,
-    creditHours: Number
+    id: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    name: {
+        type: String,
+        required: true
+    },
+    prerequisites: {
+        type: Array
+    },
+    creditHours: {
+        type: Number,
+        requirejs: true
+    }
 });
 
 export default Subjects;
