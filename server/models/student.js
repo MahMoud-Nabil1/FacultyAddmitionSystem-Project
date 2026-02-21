@@ -1,31 +1,53 @@
 const mongoose = require('mongoose');
-const studentSchema = new mongoose.Schema({
-    id: {
+const { Schema } = mongoose;
+
+const studentSchema = new Schema({
+    sid: {
         type: Number,
         required: [true, 'Student ID is required'],
-        unique: true // MongoDB will automatically reject duplicate IDs!
+        unique: true
     },
+
     name: {
         type: String,
         required: [true, 'Name is required']
     },
-    hash: {type: String, required: true},
-    salt: {type: String, required: true},
-    gpa: {type: Number, default: 0.0},
 
-    completedSubjects: {
-        type: [String],
-        required: [true, 'Completed subjects are required']
+    hash: {
+        type: String,
+        required: true
     },
-    requestedSubjects: {
-        type: [String],
-        required: [true, 'Requested subjects are required']
+
+    salt: {
+        type: String,
+        required: true
     },
+
+    gpa: {
+        type: Number,
+        default: 0.0
+    },
+
+    completedSubjects: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Subjects'
+        }
+    ],
+
+    requestedSubjects: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Subjects'
+        }
+    ],
 
     department: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Department'
+        type: Schema.Types.ObjectId,
+        ref: 'Departments'
     }
 });
+
 const Student = mongoose.model('Student', studentSchema);
-module.exports = {Student};
+
+module.exports = { Student };

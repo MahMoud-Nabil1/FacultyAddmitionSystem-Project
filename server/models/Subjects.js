@@ -1,7 +1,9 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose';
 
-const Subjects = mongoose.model('Subjects', {
-    id: {
+const { Schema } = mongoose;
+
+const subjectSchema = new Schema({
+    sid: {
         type: String,
         required: true,
         unique: true
@@ -10,13 +12,18 @@ const Subjects = mongoose.model('Subjects', {
         type: String,
         required: true
     },
-    prerequisites: {
-        type: Array
-    },
+    prerequisites: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Subjects'
+        }
+    ],
     creditHours: {
         type: Number,
         required: true
     }
 });
+
+const Subjects = mongoose.model('Subjects', subjectSchema);
 
 export default Subjects;
