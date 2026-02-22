@@ -1,6 +1,12 @@
 const Student = require('../models/student');
 const Staff = require('../models/staff');
 
+/*
+searches for student and staff, detecting whether the login is staff or just student
+This is for combined logins in case we want the staff to login to the same portal the student uses (and still enter the dashboard)
+Can be split later when a different decision is made
+- Abdallah
+*/
 exports.login = async (req, res) => {
     try {
         const student = await Student //try student
@@ -19,7 +25,7 @@ exports.login = async (req, res) => {
             okStudent = await student.verifyPassword(req.body.password);
         }
         if (staff){
-            //TODO: verify password for staff too
+            okStudent = await staff.verifyPassword(req.body.password);
         }
 
         if (!okStudent && !okStaff){
