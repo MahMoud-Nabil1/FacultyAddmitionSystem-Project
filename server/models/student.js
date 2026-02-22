@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
-const { Schema } = mongoose;
+const bcrypt = require('bcrypt');
+const {Schema} = mongoose;
 
 const studentSchema = new Schema({
     id: {
@@ -15,46 +16,54 @@ const studentSchema = new Schema({
 
     hash: {
         type: String,
-        required: true
+        required: true,
+        select: false   //don't return in queries unless asked
     },
 
     salt: {
         type: String,
-        required: true
+        required: true,
+        select: false
     },
 
     gpa: {
         type: Number,
-        default: 0.0
+        default: 0.0,
+        min: 0,
+        max: 5
     },
 
     completedSubjects: [
-        {
-            type: Schema.Types.ObjectId,
-            ref: 'Subjects'
-        }
+        {type: Schema.Types.ObjectId, ref: 'Subject'}
     ],
 
     requestedSubjects: [
-        {
-            type: Schema.Types.ObjectId,
-            ref: 'Subjects'
-        }
+        {type: Schema.Types.ObjectId, ref: 'Subject'}
     ],
 
-    departments: {
+    department: {
         type: Schema.Types.ObjectId,
-        ref: 'Departments'
+        ref: 'Department'
     }
-});
+}, {timestamps: true}); // keeps track of create time and update time
 
 studentSchema.virtual('password')
-    .set(function(passwordValue) {
-        this._password = passwordValue;
-
-        this.salt = "mock_generated_salt";
-        this.hash = "mock_hashed_version_of_" + passwordValue;
+    .set(function (password) {
+        this._password = password;
     });
+
+studentSchema.pre('save', async function(next) {
+    if (!this._password) return next();
+
+    try {
+        const salt = await bcrypt.genSalt(10);
+        this.salt = salt;
+        this.hash = await bcrypt.hash(this._password, salt);
+        next();
+    } catch (err) {
+        next(err);
+    }
+});
 
 studentSchema.pre('validate', function(next) {
     if (this.isNew && !this._password) {
@@ -63,7 +72,16 @@ studentSchema.pre('validate', function(next) {
     next();
 });
 
+studentSchema.methods.verifyPassword = function(password) {
+    return bcrypt.compare(password, this.hash);
+};
+
+studentSchema.pre(/^find/, function(next) {
+    console.log("Query:", this.getQuery());
+    next();
+});
+
 
 const Student = mongoose.model('Student', studentSchema);
 
-module.exports = { Student };
+module.exports = {Student};
