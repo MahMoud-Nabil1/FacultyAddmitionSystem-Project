@@ -18,7 +18,7 @@ const staffSchema = new Schema({
     role: {
         type: String,
         required: true,
-        enum: ['admin', 'academic_guide', 'academic_guide_coordinator', 'Reporter']
+        enum: ['admin', 'academic_guide', 'academic_guide_coordinator', 'reporter']
     },
     email: {
         type: String,
