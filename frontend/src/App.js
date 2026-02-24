@@ -2,14 +2,9 @@ import './App.css';
 import {Navigate, Route, Routes} from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import GuestRoute from './components/GuestRoute.jsx';
-import ResetPasswordRoute from './components/ResetPasswordRoute.jsx';
-import ResetPassword from './components/ResetPassword.jsx';
 import Login from './components/Login.jsx';
-import ForgotPassword from './components/ForgotPassword.jsx';
 import AdminDashboard from './components/adminDashboard.jsx';
 import {CreatStaff, CreatStudent} from "./services/api";
-import AdminContact from "./components/AdminContact";
-import ITContact from "./components/ITContact";
 
 
 function App() {
@@ -35,7 +30,6 @@ function App() {
                     }
                 />
 
-
                 {/* Unprotected admin dashboard route for testing */}
                 <Route
                     path="/admin-dashboard-test"
@@ -58,24 +52,7 @@ function App() {
                 }/>
                 <Route path="/ForgotPassWord" element={
                     <GuestRoute>
-                        <ForgotPassword />
-                    </GuestRoute>
-                }/>
-                <Route path="/reset-password" element={
-                    <GuestRoute>
-                        <ResetPasswordRoute>
-                            <ResetPassword />
-                        </ResetPasswordRoute>
-                    </GuestRoute>
-                }/>
-                <Route path="/ITContact" element={
-                    <GuestRoute>
-                        <ITContact/>
-                    </GuestRoute>
-                }/>
-                <Route path="/AdminContact" element={
-                    <GuestRoute>
-                        <AdminContact/>
+                        <h1>ForgotPassWord</h1>
                     </GuestRoute>
                 }/>
 
