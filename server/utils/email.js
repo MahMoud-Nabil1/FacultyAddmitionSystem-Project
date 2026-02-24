@@ -9,7 +9,9 @@ const transporter = nodemailer.createTransport({
             user: process.env.SMTP_USER,
             pass: process.env.SMTP_PASS
           }
-        : undefined
+        : undefined,
+    connectionTimeout: 15000,
+    greetingTimeout: 10000
 });
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
@@ -34,8 +36,10 @@ async function sendPasswordResetEmail(toEmail, token) {
             return;
         }
         await transporter.sendMail(mailOptions);
+        console.log('[Email] Password reset email sent to', toEmail);
     } catch (err) {
         console.error('Send reset email failed:', err.message);
+        if (err.response) console.error('SMTP response:', err.response);
         throw err;
     }
 }

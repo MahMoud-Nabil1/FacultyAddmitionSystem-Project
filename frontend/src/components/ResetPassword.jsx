@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-
-const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
+import { apiPost } from '../services/api';
 
 /**
  * Reset password form. Must be rendered inside ResetPasswordRoute so it receives token as prop.
@@ -27,12 +26,7 @@ const ResetPassword = ({ token }) => {
         }
         setLoading(true);
         try {
-            const res = await fetch(`${API_BASE}/auth/reset-password`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token, newPassword }),
-            });
-            const data = await res.json().catch(() => ({}));
+            const { res, data } = await apiPost('/auth/reset-password', { token, newPassword });
             if (!res.ok) {
                 setError(data.error || 'Failed to reset password.');
                 return;

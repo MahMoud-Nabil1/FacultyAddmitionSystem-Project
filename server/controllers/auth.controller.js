@@ -8,6 +8,22 @@ const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'faculty-admission-secret-key';
 const RESET_TOKEN_EXPIRY_MS = 60 * 60 * 1000; // 1 hour
 
+const INVALID_RESET_LINK = 'Invalid or expired reset link';
+
+/**
+ * Find a valid password reset token. Returns the document or null (and deletes if expired).
+ */
+async function findValidResetToken(token) {
+    if (!token) return null;
+    const resetDoc = await PasswordResetToken.findOne({ token });
+    if (!resetDoc) return null;
+    if (new Date() > resetDoc.expiresAt) {
+        await PasswordResetToken.deleteOne({ token });
+        return null;
+    }
+    return resetDoc;
+}
+
 exports.studentLogin = async (req, res) => {
     try {
         const student = await Student
@@ -74,11 +90,11 @@ exports.requestPasswordReset = async (req, res) => {
             return res.status(400).json({ error: 'Email is required' });
         }
 
-        let role = null;
-        const staff = await Staff.findOne({ email });
-        if (staff) role = 'staff';
-        const student = staff ? null : await Student.findOne({ email });
-        if (student) role = 'student';
+        const [staff, student] = await Promise.all([
+            Staff.findOne({ email }),
+            Student.findOne({ email })
+        ]);
+        const role = staff ? 'staff' : (student ? 'student' : null);
 
         if (!role) {
             return res.json({
@@ -108,17 +124,9 @@ exports.requestPasswordReset = async (req, res) => {
 exports.verifyPasswordResetToken = async (req, res) => {
     try {
         const token = req.query.token || req.body.token;
-        if (!token) {
-            return res.status(400).json({ error: 'Token is required' });
-        }
-
-        const resetDoc = await PasswordResetToken.findOne({ token });
+        const resetDoc = await findValidResetToken(token);
         if (!resetDoc) {
-            return res.status(400).json({ error: 'Invalid or expired reset link' });
-        }
-        if (new Date() > resetDoc.expiresAt) {
-            await PasswordResetToken.deleteOne({ token });
-            return res.status(400).json({ error: 'Invalid or expired reset link' });
+            return res.status(400).json({ error: INVALID_RESET_LINK });
         }
 
         return res.json({
@@ -141,13 +149,9 @@ exports.resetPassword = async (req, res) => {
             return res.status(400).json({ error: 'Token and newPassword are required' });
         }
 
-        const resetDoc = await PasswordResetToken.findOne({ token });
+        const resetDoc = await findValidResetToken(token);
         if (!resetDoc) {
-            return res.status(400).json({ error: 'Invalid or expired reset link' });
-        }
-        if (new Date() > resetDoc.expiresAt) {
-            await PasswordResetToken.deleteOne({ token });
-            return res.status(400).json({ error: 'Invalid or expired reset link' });
+            return res.status(400).json({ error: INVALID_RESET_LINK });
         }
 
         if (typeof newPassword !== 'string' || newPassword.length < 6) {

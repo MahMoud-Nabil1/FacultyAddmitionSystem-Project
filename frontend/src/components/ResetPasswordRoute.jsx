@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-
-const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
+import { apiGet } from '../services/api';
 
 /**
  * ResetPasswordRoute — verifies the reset token from the URL before showing the reset form.
@@ -24,10 +23,7 @@ const ResetPasswordRoute = ({ children }) => {
         let cancelled = false;
         const verify = async () => {
             try {
-                const res = await fetch(
-                    `${API_BASE}/auth/verify-reset-token?token=${encodeURIComponent(token)}`
-                );
-                const data = await res.json().catch(() => ({}));
+                const { res, data } = await apiGet(`/auth/verify-reset-token?token=${encodeURIComponent(token)}`);
                 if (cancelled) return;
                 if (res.ok && data.valid) {
                     setStatus('valid');
