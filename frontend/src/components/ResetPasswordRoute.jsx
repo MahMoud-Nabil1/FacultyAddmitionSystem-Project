@@ -54,7 +54,7 @@ const ResetPasswordRoute = ({ children }) => {
         return (
             <div style={{ padding: '2rem', textAlign: 'center' }}>
                 <p style={{ color: '#c00', marginBottom: '1rem' }}>{error}</p>
-                <Link to="/ForgotPassWord">Request a new reset link</Link>
+                <Link to="/forgot-password">Request a new reset link</Link>
             </div>
         );
     }

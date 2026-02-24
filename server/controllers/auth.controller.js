@@ -7,6 +7,8 @@ const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'faculty-admission-secret-key';
 const RESET_TOKEN_EXPIRY_MS = 60 * 60 * 1000; // 1 hour
+const FACULTY_EMAIL_PREFIX = '20';
+const FACULTY_EMAIL_DOMAIN = '@std.sci.cu.edu.eg';
 
 const INVALID_RESET_LINK = 'Invalid or expired reset link';
 
@@ -117,6 +119,45 @@ exports.requestPasswordReset = async (req, res) => {
 };
 
 /**
+ * Forgot password via faculty email: user enters SID, we send reset link to {studentId}@std.sci.cu.edu.eg
+ * Body: { studentId: number }
+ */
+exports.requestPasswordResetFacultyEmail = async (req, res) => {
+    try {
+        const studentId = req.body.studentId != null ? Number(req.body.studentId) : NaN;
+        if (!Number.isInteger(studentId) || studentId <= 0) {
+            return res.status(400).json({ error: 'Valid student ID is required' });
+        }
+
+        const student = await Student.findOne({ studentId });
+        if (!student) {
+            return res.json({
+                message: 'cannot find account with this student ID in the database'
+            });
+        }
+
+        const facultyEmail = `${FACULTY_EMAIL_PREFIX}${studentId}${FACULTY_EMAIL_DOMAIN}`;
+        const token = crypto.randomBytes(32).toString('hex');
+        const expiresAt = new Date(Date.now() + RESET_TOKEN_EXPIRY_MS);
+        await PasswordResetToken.create({
+            email: facultyEmail,
+            token,
+            role: 'student',
+            expiresAt,
+            studentId
+        });
+
+        await sendPasswordResetEmail(facultyEmail, token);
+
+        return res.json({
+            message: 'message sent to the email'
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+/**
  * Verify the reset token (e.g. when user lands on reset page from email link).
  * If valid, client can show the "enter new password" form.
  * Token from query: ?token=xxx or body: { token: string }
@@ -158,10 +199,12 @@ exports.resetPassword = async (req, res) => {
             return res.status(400).json({ error: 'newPassword must be at least 6 characters' });
         }
 
-        const { email, role } = resetDoc;
+        const { email, role, studentId } = resetDoc;
 
         if (role === 'student') {
-            const student = await Student.findOne({ email }).select('+hash +salt');
+            const student = studentId != null
+                ? await Student.findOne({ studentId }).select('+hash +salt')
+                : await Student.findOne({ email }).select('+hash +salt');
             if (!student) {
                 await PasswordResetToken.deleteOne({ token });
                 return res.status(400).json({ error: 'Account no longer found' });
