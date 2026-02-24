@@ -17,24 +17,24 @@ const ResetPassword = ({ token }) => {
         e.preventDefault();
         setError('');
         if (newPassword.length < 6) {
-            setError('Password must be at least 6 characters.');
+            setError('كلمة السر يجب ان تكون على الأقل من ستة احرف');
             return;
         }
         if (newPassword !== confirmPassword) {
-            setError('Passwords do not match.');
+            setError('كلمتا السر ليسا متشابهان');
             return;
         }
         setLoading(true);
         try {
             const { res, data } = await apiPost('/auth/reset-password', { token, newPassword });
             if (!res.ok) {
-                setError(data.error || 'Failed to reset password.');
+                setError(data.error || 'فشلت عملية اعادة تعيين كلمة السر');
                 return;
             }
             setSuccess(true);
             setTimeout(() => navigate('/login'), 2000);
         } catch (err) {
-            setError('Unable to connect to server.');
+            setError('لم يمكن التواصل مع السيرفر');
         } finally {
             setLoading(false);
         }
@@ -43,20 +43,20 @@ const ResetPassword = ({ token }) => {
     if (success) {
         return (
             <div style={{ padding: '2rem', textAlign: 'center' }}>
-                <p style={{ color: 'green', marginBottom: '1rem' }}>Password updated successfully. Redirecting to login...</p>
-                <Link to="/login">Go to login</Link>
+                <p style={{ color: 'green', marginBottom: '1rem' }}>تم تحديث كلمة السر بنجاح! يتم الرجوع الى صفحة تسجيل الدخول</p>
+                <Link to="/login">اذهب الى صفحة تسجيل الدخول</Link>
             </div>
         );
     }
 
     return (
         <div style={{ maxWidth: 400, margin: '2rem auto', padding: '1rem' }}>
-            <h1>Reset password</h1>
-            <p style={{ marginBottom: '1rem' }}>Enter your new password below.</p>
+            <h1>اعادة تعيين كلمة السر</h1>
+            <p style={{ marginBottom: '1rem' }}>اكتب كلمة السر الجديدة الخاصة بك</p>
             <form onSubmit={handleSubmit}>
                 {error && <p style={{ color: '#c00', marginBottom: '0.5rem' }}>{error}</p>}
                 <div style={{ marginBottom: '1rem' }}>
-                    <label htmlFor="newPassword">New password</label>
+                    <label htmlFor="newPassword">كلمة السر الجديدة</label>
                     <input
                         id="newPassword"
                         type="password"
@@ -68,7 +68,7 @@ const ResetPassword = ({ token }) => {
                     />
                 </div>
                 <div style={{ marginBottom: '1rem' }}>
-                    <label htmlFor="confirmPassword">Confirm password</label>
+                    <label htmlFor="confirmPassword">اعد كتابة كلمة السر</label>
                     <input
                         id="confirmPassword"
                         type="password"
@@ -84,7 +84,7 @@ const ResetPassword = ({ token }) => {
                 </button>
             </form>
             <p style={{ marginTop: '1rem' }}>
-                <Link to="/login">Back to login</Link>
+                <Link to="/login">ارجع على صفحة تسجيل الدخول</Link>
             </p>
         </div>
     );
