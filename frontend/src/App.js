@@ -5,6 +5,7 @@ import GuestRoute from './components/GuestRoute.jsx';
 import ResetPasswordRoute from './components/ResetPasswordRoute.jsx';
 import ResetPassword from './components/ResetPassword.jsx';
 import Login from './components/Login.jsx';
+import ForgotPasswordChoice from './components/ForgotPasswordChoice.jsx';
 import ForgotPassword from './components/ForgotPassword.jsx';
 import AdminDashboard from './components/adminDashboard.jsx';
 import {CreatStaff, CreatStudent} from "./services/api";
@@ -54,6 +55,11 @@ function App() {
                 <Route path="/login" element={
                     <GuestRoute>
                         <Login/>
+                    </GuestRoute>
+                }/>
+                <Route path="/forgot-password" element={
+                    <GuestRoute>
+                        <ForgotPasswordChoice />
                     </GuestRoute>
                 }/>
                 <Route path="/ForgotPassWord" element={

@@ -7,7 +7,7 @@ const ForgotPassword = () => {
     const [email, setEmail] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const [success, setSuccess] = useState(false);
+    const [successResult, setSuccessResult] = useState(null); // 'sent' | 'not_found'
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -24,7 +24,8 @@ const ForgotPassword = () => {
                 setError(data.error || 'Something went wrong.');
                 return;
             }
-            setSuccess(true);
+            const isSent = data.message === 'message sent to the email';
+            setSuccessResult(isSent ? 'sent' : 'not_found');
         } catch (err) {
             setError('Unable to connect to server.');
         } finally {
@@ -32,13 +33,29 @@ const ForgotPassword = () => {
         }
     };
 
-    if (success) {
+    if (successResult === 'sent') {
         return (
             <div className="login-page">
                 <div className="login-card">
                     <div className="login-header">
-                        <h1>Check your email</h1>
-                        <p>If an account exists for that email, we sent a password reset link.</p>
+                        <h1>Success!</h1>
+                        <p style={{ color: 'var(--success, #22c55e)' }}>Sent successfully.</p>
+                    </div>
+                    <p style={{ textAlign: 'center', marginTop: '1rem' }}>
+                        <Link to="/login" className="forgot-link">Back to login</Link>
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    if (successResult === 'not_found') {
+        return (
+            <div className="login-page">
+                <div className="login-card">
+                    <div className="login-header">
+                        <h1>Forgot password</h1>
+                        <p style={{ color: '#f87171', marginBottom: '1rem' }}>There is no account with this email in the database.</p>
                     </div>
                     <p style={{ textAlign: 'center', marginTop: '1rem' }}>
                         <Link to="/login" className="forgot-link">Back to login</Link>
