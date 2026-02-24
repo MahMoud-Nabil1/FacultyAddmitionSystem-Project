@@ -11,6 +11,7 @@ import AdminDashboard from './components/adminDashboard.jsx';
 import {CreatStaff, CreatStudent} from "./services/api";
 import AdminContact from "./components/AdminContact";
 import ITContact from "./components/ITContact";
+import Announcements from "./components/announcements";
 
 
 function App() {
@@ -35,6 +36,12 @@ function App() {
                         </ProtectedRoute>
                     }
                 />
+                <Route
+                    path="/announcements"
+                    element={
+                    <Announcements/>
+                }>
+                </Route>
 
                 {/* Unprotected admin dashboard route for testing */}
                 <Route
@@ -58,18 +65,18 @@ function App() {
                 }/>
                 <Route path="/forgot-password" element={
                     <GuestRoute>
-                        <ForgotPasswordChoice />
+                        <ForgotPasswordChoice/>
                     </GuestRoute>
                 }/>
                 <Route path="/ForgotPassWord" element={
                     <GuestRoute>
-                        <ForgotPassword />
+                        <ForgotPassword/>
                     </GuestRoute>
                 }/>
                 <Route path="/reset-password" element={
                     <GuestRoute>
                         <ResetPasswordRoute>
-                            <ResetPassword />
+                            <ResetPassword/>
                         </ResetPasswordRoute>
                     </GuestRoute>
                 }/>
