@@ -70,7 +70,11 @@ const Login = () => {
                         <path d="M6 12v5c0 0 3 3 6 3s6-3 6-3v-5" />
                         <line x1="22" y1="10" x2="22" y2="16" />
                     </svg>
-                    جامعة القاهرة - كلية العلوم
+                    STATE UNIVERSITY
+                </div>
+                <div className="image-content">
+                    <h1>Shaping the future, one student at a time.</h1>
+                    <p>Access the faculty portal to manage admissions, courses, and student records efficiently and securely.</p>
                 </div>
             </div>
 
