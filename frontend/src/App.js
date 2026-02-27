@@ -7,7 +7,8 @@ import ResetPassword from './components/ResetPassword.jsx';
 import Login from './components/Login.jsx';
 import ForgotPasswordChoice from './components/ForgotPasswordChoice.jsx';
 import ForgotPassword from './components/ForgotPassword.jsx';
-import AdminDashboard from './components/admin-dashboard/adminDashboard.jsx';
+import AdminDashboard from './components/adminDashboard.jsx';
+import {CreatStaff, CreatStudent} from "./services/api";
 import AdminContact from "./components/AdminContact";
 import ITContact from "./components/ITContact";
 
@@ -42,7 +43,10 @@ function App() {
                         <div style={{padding: "2rem"}}>
                             <h1>Admin Dashboard (Test)</h1>
                             <hr/>
-                            <AdminDashboard/>
+                            <AdminDashboard
+                                onAddStaff={CreatStaff}
+                                onAddStudent={CreatStudent}
+                            />
                         </div>
                     }
                 />
