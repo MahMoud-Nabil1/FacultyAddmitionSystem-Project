@@ -4,22 +4,22 @@ const nodemailer = require('nodemailer');
 
 exports.createStudent = async (req, res) => {
     try {
-        const {email, studentId, password, ...rest} = req.body;
+        const student = new Student(req.body);
+        student.password = req.body.password;
 
-        // Check if a student already exists with studentId
-        const existingStudent = await Student.findOne({studentId});
+        await student.save();
+        res.status(201).json(student);
 
-        if (existingStudent) {
-            return res.status(409).json({error: 'Student with this email or ID already exists'});
+    } catch (err) {
+
+        // Mongo duplicate key error
+        if (err.code === 11000) {
+            return res.status(409).json({
+                error: "طالب بنفس الكود أو الإيميل موجود بالفعل"
+            });
         }
 
-        const student = new Student({email, studentId, ...rest});
-        student.password = password; // gets automatically hashed upon saving
-        await student.save();
-
-        res.status(201).json(student);
-    } catch (err) {
-        res.status(400).json({error: err.message});
+        res.status(400).json({ error: err.message });
     }
 };
 exports.getAllStudents = async (req, res) => {

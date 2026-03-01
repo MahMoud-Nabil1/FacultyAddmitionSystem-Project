@@ -7,6 +7,8 @@ const StudentPanel = () => {
     const [students, setStudents] = useState([]);
     const [page, setPage] = useState(0);
     const [showForm, setShowForm] = useState(false);
+    const [error, setError] = useState(null);
+
     const [form, setForm] = useState({
         studentId: "",
         name: "",
@@ -14,20 +16,44 @@ const StudentPanel = () => {
         password: "",
         gpa: ""
     });
+
     const [copiedId, setCopiedId] = useState(null);
 
     const load = async () => setStudents(await getAllStudents());
 
     useEffect(() => { load(); }, []);
 
-    const submit = async e => {
+    const submit = async (e) => {
         e.preventDefault();
-        await createStudent(form);
-        setShowForm(false);
-        await load();
+        setError(null);
+
+        try {
+            await createStudent(form);
+
+            setForm({
+                studentId: "",
+                name: "",
+                email: "",
+                password: "",
+                gpa: ""
+            });
+
+            setShowForm(false);
+            await load();
+        } catch (err) {
+            // Handle duplicate (409) or other backend errors
+            if (err.response?.status === 409) {
+                setError("طالب بنفس الكود موجود بالفعل");
+            } else {
+                setError(err.response?.data?.error || "حدث خطأ غير متوقع");
+            }
+        }
     };
 
-    const slice = students.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
+    const slice = students.slice(
+        page * PAGE_SIZE,
+        page * PAGE_SIZE + PAGE_SIZE
+    );
 
     return (
         <div className="dashboard-container">
@@ -39,6 +65,12 @@ const StudentPanel = () => {
 
             {showForm && (
                 <form className="form" onSubmit={submit}>
+                    {error && (
+                        <div className="error-message">
+                            {error}
+                        </div>
+                    )}
+
                     <input
                         placeholder="كود الطالب"
                         value={form.studentId}
@@ -65,41 +97,44 @@ const StudentPanel = () => {
                         value={form.password}
                         onChange={e => setForm({ ...form, password: e.target.value })}
                     />
-                    <button className="submit-btn">سجل طالب جديد</button>
+
+                    <button className="submit-btn">
+                        سجل طالب جديد
+                    </button>
                 </form>
             )}
 
             <table>
                 <thead>
-                    <tr>
-                        <th>كود الطالب</th>
-                        <th>الإسم</th>
-                        <th>الإيميل</th>
-                        <th>المعدل التراكمى</th>
-                        <th>ID</th>
-                    </tr>
+                <tr>
+                    <th>كود الطالب</th>
+                    <th>الإسم</th>
+                    <th>الإيميل</th>
+                    <th>المعدل التراكمى</th>
+                    <th>ID</th>
+                </tr>
                 </thead>
                 <tbody>
-                    {slice.map(s => (
-                        <tr key={s._id}>
-                            <td>{s.studentId}</td>
-                            <td>{s.name}</td>
-                            <td>{s.email}</td>
-                            <td>{s.gpa}</td>
-                            <td>
-                                <button
-                                    className="copy-btn"
-                                    onClick={() => {
-                                        navigator.clipboard.writeText(s._id);
-                                        setCopiedId(s._id);
-                                        setTimeout(() => setCopiedId(null), 3000);
-                                    }}
-                                >
-                                    {copiedId === s._id ? "تم!" : "نسخ"}
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
+                {slice.map(s => (
+                    <tr key={s._id}>
+                        <td>{s.studentId}</td>
+                        <td>{s.name}</td>
+                        <td>{s.email}</td>
+                        <td>{s.gpa}</td>
+                        <td>
+                            <button
+                                className="copy-btn"
+                                onClick={() => {
+                                    navigator.clipboard.writeText(s._id);
+                                    setCopiedId(s._id);
+                                    setTimeout(() => setCopiedId(null), 3000);
+                                }}
+                            >
+                                {copiedId === s._id ? "تم!" : "نسخ"}
+                            </button>
+                        </td>
+                    </tr>
+                ))}
                 </tbody>
             </table>
 
