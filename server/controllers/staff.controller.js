@@ -32,7 +32,7 @@ exports.getAllStaff = async (req, res) => {
 
 exports.getStaffById = async (req, res) => {
     try {
-        const staff = await Staff.findOne({ _id: req.params._id })
+        const staff = await Staff.findOne({ _id: req.params.id })
             .populate('departments students');
         if (!staff) return res.status(404).json({ error: "Staff not found" });
         res.json(staff);
@@ -43,7 +43,7 @@ exports.getStaffById = async (req, res) => {
 
 exports.updateStaff = async (req, res) => {
     try {
-        const staff = await Staff.findOne({ id: req.params._id });
+        const staff = await Staff.findOne({ id: req.params.id });
         if (!staff) return res.status(404).json({ error: "Staff not found" });
 
         Object.assign(staff, req.body);
@@ -58,7 +58,7 @@ exports.updateStaff = async (req, res) => {
 
 exports.deleteStaff = async (req, res) => {
     try {
-        const staff = await Staff.findOneAndDelete({ _id: req.params._id });
+        const staff = await Staff.findOneAndDelete({ _id: req.params.id });
         if (!staff) return res.status(404).json({ error: "Staff not found" });
         res.json({ message: "Deleted successfully" });
     } catch (err) {
