@@ -88,7 +88,7 @@ const StudentPanel: React.FC = () => {
         <div className="dashboard-container">
             <h2>الطلاب</h2>
 
-            <button className="add-btn" onClick={toggleForm}>
+            <button className="panel-btn" onClick={toggleForm}>
                 {showForm ? "الغاء" : "اضف طالب جديد"}
             </button>
 

@@ -18,7 +18,6 @@ interface StaffForm {
 }
 
 const StaffPanel: React.FC = () => {
-    const [staff, setStaff] = useState<Staff[]>([]);
     const [showForm, setShowForm] = useState(false);
     const [form, setForm] = useState<StaffForm>({
         name: "",
@@ -30,20 +29,6 @@ const StaffPanel: React.FC = () => {
     const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
-
-    // Load staff count (optional)
-    const loadStaff = async () => {
-        try {
-            const data = await getAllStaff();
-            setStaff(data);
-        } catch {
-            setError("فشل تحميل قائمة الموظفين");
-        }
-    };
-
-    useEffect(() => {
-        loadStaff();
-    }, []);
 
     const handleChange = (
         e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -61,7 +46,6 @@ const StaffPanel: React.FC = () => {
             await createStaff(form);
             setForm({ name: "", email: "", role: "admin", password: "" });
             setShowForm(false);
-            await loadStaff();
         } catch (err: any) {
             if (err.status === 409) {
                 setError("يوجد موظف بنفس الإيميل بالفعل");
@@ -77,65 +61,84 @@ const StaffPanel: React.FC = () => {
         <div className="dashboard-container">
             <h2>الموظفين</h2>
 
-            {/* Toggle form */}
-            <button
-                className="add-btn"
-                onClick={() => setShowForm((prev) => !prev)}
-            >
-                {showForm ? "إلغاء" : "اضف موظف جديد"}
-            </button>
+            {/* Buttons */}
+            <div style={{ display: "flex", gap: "15px", flexWrap: "wrap", marginBottom: "20px" }}>
+                <button
+                    className="panel-btn"
+                    onClick={() => setShowForm((prev) => !prev)}
+                >
+                    {showForm ? "إلغاء" : "اضف موظف جديد"}
+                </button>
 
+                <button
+                    className="panel-btn"
+                    onClick={() => navigate("/admin-dashboard/table")}
+                >
+                    عرض جميع الموظفين
+                </button>
+            </div>
+
+            {/* Form */}
             {showForm && (
                 <form className="form" onSubmit={handleSubmit}>
                     {error && <p className="error">{error}</p>}
 
-                    <input
-                        name="name"
-                        placeholder="الإسم"
-                        value={form.name}
-                        onChange={handleChange}
-                        required
-                    />
-                    <input
-                        name="email"
-                        placeholder="الإيميل"
-                        value={form.email}
-                        onChange={handleChange}
-                        required
-                    />
-                    <select
-                        name="role"
-                        value={form.role}
-                        onChange={handleChange}
-                        required
-                    >
-                        {Object.entries(ROLES).map(([v, l]) => (
-                            <option key={v} value={v}>
-                                {l}
-                            </option>
-                        ))}
-                    </select>
-                    <input
-                        name="password"
-                        type="password"
-                        placeholder="كلمة السر"
-                        value={form.password}
-                        onChange={handleChange}
-                        required
-                    />
+                    <div className="form-group">
+                        <label>الإسم</label>
+                        <input
+                            name="name"
+                            placeholder="أدخل الاسم الكامل"
+                            value={form.name}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label>الإيميل</label>
+                        <input
+                            name="email"
+                            type="email"
+                            placeholder="أدخل البريد الإلكتروني"
+                            value={form.email}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label>الرتبة</label>
+                        <select
+                            name="role"
+                            value={form.role}
+                            onChange={handleChange}
+                            required
+                        >
+                            {Object.entries(ROLES).map(([v, l]) => (
+                                <option key={v} value={v}>
+                                    {l}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="form-group">
+                        <label>كلمة السر</label>
+                        <input
+                            name="password"
+                            type="password"
+                            placeholder="أدخل كلمة السر"
+                            value={form.password}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+
                     <button className="submit-btn" disabled={loading}>
                         {loading ? "جارٍ التسجيل..." : "سجل موظف جديد"}
                     </button>
                 </form>
             )}
-
-            {/* Button to navigate to full staff table */}
-            <button
-                className="view-table-btn"
-                onClick={() => navigate("/admin-dashboard/table")}
-            >
-                عرض جميع الموظفين ({staff.length})
-            </button>
         </div>
     );
 };

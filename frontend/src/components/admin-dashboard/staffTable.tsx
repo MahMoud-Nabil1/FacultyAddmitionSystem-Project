@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { getAllStaff, deleteStaff } from "../../services/api";
 import { ROLES } from "./constants";
 
@@ -11,8 +12,13 @@ interface Staff {
 
 const StaffTable: React.FC = () => {
     const [staff, setStaff] = useState<Staff[]>([]);
+    const [filteredStaff, setFilteredStaff] = useState<Staff[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [copiedId, setCopiedId] = useState<string | null>(null);
+    const [searchId, setSearchId] = useState("");
+    const [filterRole, setFilterRole] = useState<keyof typeof ROLES | "all">("all");
+
+    const navigate = useNavigate();
 
     const loadStaff = async () => {
         try {
@@ -22,6 +28,20 @@ const StaffTable: React.FC = () => {
             setError("فشل تحميل قائمة الموظفين");
         }
     };
+
+    useEffect(() => {
+        let temp = [...staff];
+
+        if (filterRole !== "all") {
+            temp = temp.filter((s) => s.role === filterRole);
+        }
+
+        if (searchId.trim() !== "") {
+            temp = temp.filter((s) => s._id.includes(searchId.trim()));
+        }
+
+        setFilteredStaff(temp);
+    }, [staff, searchId, filterRole]);
 
     const handleCopy = (id: string) => {
         navigator.clipboard.writeText(id);
@@ -33,7 +53,7 @@ const StaffTable: React.FC = () => {
         if (!window.confirm("هل أنت متأكد من حذف هذا الموظف؟")) return;
         try {
             await deleteStaff(id);
-            await loadStaff();
+            setStaff((prev) => prev.filter((x) => x._id !== id));
         } catch {
             setError("فشل حذف الموظف");
         }
@@ -48,6 +68,37 @@ const StaffTable: React.FC = () => {
             <h2>جدول الموظفين</h2>
             {error && <p className="error">{error}</p>}
 
+            {/* Back button */}
+            <button
+                style={{ marginBottom: "16px", padding: "8px 16px", background: "#ddd" }}
+                onClick={() => navigate("/admin-dashboard")}
+            >
+                العودة إلى لوحة الإدارة
+            </button>
+
+            {/* Top filter/search bar */}
+            <div style={{ display: "flex", gap: "12px", marginBottom: "16px", flexWrap: "wrap" }}>
+                <input
+                    type="text"
+                    placeholder="بحث بالـ ID"
+                    value={searchId}
+                    onChange={(e) => setSearchId(e.target.value)}
+                    style={{ padding: "8px", flex: "1 1 200px" }}
+                />
+                <select
+                    value={filterRole}
+                    onChange={(e) => setFilterRole(e.target.value as keyof typeof ROLES | "all")}
+                    style={{ padding: "8px", flex: "0 0 150px" }}
+                >
+                    <option value="all">الكل</option>
+                    {Object.entries(ROLES).map(([v, l]) => (
+                        <option key={v} value={v}>
+                            {l}
+                        </option>
+                    ))}
+                </select>
+            </div>
+
             <table className="staff-table">
                 <thead>
                 <tr>
@@ -59,7 +110,7 @@ const StaffTable: React.FC = () => {
                 </tr>
                 </thead>
                 <tbody>
-                {staff.map((s) => (
+                {filteredStaff.map((s) => (
                     <tr key={s._id}>
                         <td>{s.name}</td>
                         <td>{s.email}</td>
@@ -75,16 +126,7 @@ const StaffTable: React.FC = () => {
                         <td>
                             <button
                                 className="delete-btn"
-                                onClick={async () => {
-                                    if (window.confirm("هل أنت متأكد من حذف الموظف؟")) {
-                                        try {
-                                            await deleteStaff(s._id);
-                                            setStaff((prev) => prev.filter((x) => x._id !== s._id));
-                                        } catch (err: any) {
-                                            alert(err.message || "فشل الحذف");
-                                        }
-                                    }
-                                }}
+                                onClick={() => handleDelete(s._id)}
                             >
                                 حذف
                             </button>
