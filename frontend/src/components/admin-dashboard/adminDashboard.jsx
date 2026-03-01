@@ -1,5 +1,5 @@
 import React from "react";
-import StudentPanel from "./studentPanel";
+import StudentPanel from "./studentPanel.tsx";
 import StaffPanel from "./staffPanel.tsx";
 import "./css/adminDashboard.css";
 
