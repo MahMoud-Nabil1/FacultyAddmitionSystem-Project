@@ -1,14 +1,7 @@
-import React, { useEffect, useState, ChangeEvent, FormEvent } from "react";
-import { createStaff, getAllStaff } from "../../services/api";
-import { useNavigate } from "react-router-dom";
-import { PAGE_SIZE, ROLES } from "./constants";
-
-interface Staff {
-    _id: string;
-    name: string;
-    email: string;
-    role: keyof typeof ROLES;
-}
+import React, {ChangeEvent, FormEvent, useState} from "react";
+import {createStaff} from "../../services/api";
+import {useNavigate} from "react-router-dom";
+import {ROLES} from "./constants";
 
 interface StaffForm {
     name: string;
@@ -33,8 +26,8 @@ const StaffPanel: React.FC = () => {
     const handleChange = (
         e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
     ) => {
-        const { name, value } = e.target;
-        setForm((prev) => ({ ...prev, [name]: value }));
+        const {name, value} = e.target;
+        setForm((prev) => ({...prev, [name]: value}));
     };
 
     const handleSubmit = async (e: FormEvent) => {
@@ -44,7 +37,7 @@ const StaffPanel: React.FC = () => {
 
         try {
             await createStaff(form);
-            setForm({ name: "", email: "", role: "admin", password: "" });
+            setForm({name: "", email: "", role: "admin", password: ""});
             setShowForm(false);
         } catch (err: any) {
             if (err.status === 409) {
@@ -62,7 +55,7 @@ const StaffPanel: React.FC = () => {
             <h2>الموظفين</h2>
 
             {/* Buttons */}
-            <div style={{ display: "flex", gap: "15px", flexWrap: "wrap", marginBottom: "20px" }}>
+            <div style={{display: "flex", gap: "15px", flexWrap: "wrap", marginBottom: "20px"}}>
                 <button
                     className="panel-btn"
                     onClick={() => setShowForm((prev) => !prev)}
