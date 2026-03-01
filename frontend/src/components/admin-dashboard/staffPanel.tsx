@@ -72,7 +72,7 @@ const StaffPanel: React.FC = () => {
 
                 <button
                     className="panel-btn"
-                    onClick={() => navigate("/admin-dashboard/table")}
+                    onClick={() => navigate("/admin-dashboard/table?type=staff")}
                 >
                     عرض جميع الموظفين
                 </button>

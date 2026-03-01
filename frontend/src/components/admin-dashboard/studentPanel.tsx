@@ -1,15 +1,6 @@
-import React, { useEffect, useState, FormEvent } from "react";
-import { createStudent, getAllStudents } from "../../services/api";
-import Pagination from "./pagination";
-import { PAGE_SIZE } from "./constants";
-
-interface Student {
-    _id: string;
-    studentId: string;
-    name: string;
-    email: string;
-    gpa: string;
-}
+import React, { useState, FormEvent } from "react";
+import { createStudent } from "../../services/api";
+import { useNavigate } from "react-router-dom";
 
 interface StudentForm {
     studentId: string;
@@ -20,9 +11,6 @@ interface StudentForm {
 }
 
 const StudentPanel: React.FC = () => {
-    const [students, setStudents] = useState<Student[]>([]);
-    const [page, setPage] = useState<number>(0);
-    const [showForm, setShowForm] = useState<boolean>(false);
     const [form, setForm] = useState<StudentForm>({
         studentId: "",
         name: "",
@@ -30,25 +18,12 @@ const StudentPanel: React.FC = () => {
         password: "",
         gpa: "",
     });
-    const [copiedId, setCopiedId] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
+    const [showForm, setShowForm] = useState<boolean>(false);
 
-    // Load students
-    const loadStudents = async () => {
-        try {
-            const data = await getAllStudents();
-            setStudents(data);
-        } catch {
-            setError("فشل تحميل قائمة الطلاب");
-        }
-    };
+    const navigate = useNavigate();
 
-    useEffect(() => {
-        loadStudents();
-    }, []);
-
-    // Submit handler
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setError(null);
@@ -58,7 +33,6 @@ const StudentPanel: React.FC = () => {
             await createStudent(form);
             setForm({ studentId: "", name: "", email: "", password: "", gpa: "" });
             setShowForm(false);
-            await loadStudents();
         } catch (err: any) {
             if (err.status === 409) {
                 setError("طالب بنفس الكود موجود بالفعل");
@@ -70,25 +44,12 @@ const StudentPanel: React.FC = () => {
         }
     };
 
-    // Toggle form visibility
-    const toggleForm = () => {
-        if (showForm) {
-            setForm({ studentId: "", name: "", email: "", password: "", gpa: "" });
-            setError(null);
-        }
-        setShowForm(!showForm);
-    };
-
-    const slicedStudents = students.slice(
-        page * PAGE_SIZE,
-        page * PAGE_SIZE + PAGE_SIZE
-    );
-
     return (
         <div className="dashboard-container">
             <h2>الطلاب</h2>
 
-            <button className="panel-btn" onClick={toggleForm}>
+            {/* Toggle form */}
+            <button className="panel-btn" onClick={() => setShowForm(prev => !prev)}>
                 {showForm ? "الغاء" : "اضف طالب جديد"}
             </button>
 
@@ -129,41 +90,13 @@ const StudentPanel: React.FC = () => {
                 </form>
             )}
 
-            <table>
-                <thead>
-                <tr>
-                    <th>كود الطالب</th>
-                    <th>الإسم</th>
-                    <th>الإيميل</th>
-                    <th>المعدل التراكمى</th>
-                    <th>ID</th>
-                </tr>
-                </thead>
-                <tbody>
-                {slicedStudents.map((s) => (
-                    <tr key={s._id}>
-                        <td>{s.studentId}</td>
-                        <td>{s.name}</td>
-                        <td>{s.email}</td>
-                        <td>{s.gpa}</td>
-                        <td>
-                            <button
-                                className="copy-btn"
-                                onClick={() => {
-                                    navigator.clipboard.writeText(s._id);
-                                    setCopiedId(s._id);
-                                    setTimeout(() => setCopiedId(null), 3000);
-                                }}
-                            >
-                                {copiedId === s._id ? "تم!" : "نسخ"}
-                            </button>
-                        </td>
-                    </tr>
-                ))}
-                </tbody>
-            </table>
-
-            <Pagination page={page} setPage={setPage} total={students.length} />
+            {/* Navigate to students table */}
+            <button
+                className="view-table-btn"
+                onClick={() => navigate("/admin-dashboard/table?type=students")}
+            >
+                عرض جميع الطلاب
+            </button>
         </div>
     );
 };

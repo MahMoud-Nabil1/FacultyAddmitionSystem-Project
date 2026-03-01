@@ -8,7 +8,7 @@ import ForgotPassword from './components/auth/ForgotPassword.jsx';
 import AdminDashboard from './components/admin-dashboard/adminDashboard.jsx';
 import SupportContact from "./components/support/SupportContact.jsx";
 import Announcements from "./components/admin-dashboard/announcements.jsx";
-import StaffTable from "./components/admin-dashboard/staffTable.tsx";
+import AdminDashboardTable from "./components/admin-dashboard/tables/table.tsx";
 
 
 function App() {
@@ -99,8 +99,8 @@ function App() {
                 <Route
                     path="/admin-dashboard/table"
                     element={
-                        <ProtectedRoute allowedRoles={['admin']}>
-                            <StaffTable />
+                        <ProtectedRoute allowedRoles={['admin', 'academic_guide', 'academic_guide_coordinator', 'reporter']}>
+                            <AdminDashboardTable />
                         </ProtectedRoute>
                     }
                 />

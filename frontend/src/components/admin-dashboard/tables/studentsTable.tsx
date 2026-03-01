@@ -1,47 +1,49 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAllStaff, deleteStaff } from "../../services/api";
-import { ROLES } from "./constants";
+import { getAllStudents, deleteStudent } from "../../../services/api";
+import Pagination from "../pagination";
+import { PAGE_SIZE } from "../constants";
 
-interface Staff {
+interface Student {
     _id: string;
+    studentId: string;
     name: string;
     email: string;
-    role: keyof typeof ROLES;
+    gpa: string;
 }
 
-const StaffTable: React.FC = () => {
-    const [staff, setStaff] = useState<Staff[]>([]);
-    const [filteredStaff, setFilteredStaff] = useState<Staff[]>([]);
+const StudentsTable: React.FC = () => {
+    const [students, setStudents] = useState<Student[]>([]);
+    const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [copiedId, setCopiedId] = useState<string | null>(null);
     const [searchId, setSearchId] = useState("");
-    const [filterRole, setFilterRole] = useState<keyof typeof ROLES | "all">("all");
+    const [page, setPage] = useState(0);
 
     const navigate = useNavigate();
 
-    const loadStaff = async () => {
+    const loadStudents = async () => {
         try {
-            const data = await getAllStaff();
-            setStaff(data);
+            const data = await getAllStudents();
+            setStudents(data);
         } catch {
-            setError("فشل تحميل قائمة الموظفين");
+            setError("فشل تحميل قائمة الطلاب");
         }
     };
 
     useEffect(() => {
-        let temp = [...staff];
+        loadStudents();
+    }, []);
 
-        if (filterRole !== "all") {
-            temp = temp.filter((s) => s.role === filterRole);
-        }
-
+    useEffect(() => {
+        // Filter by ID if search input is provided
+        let temp = students;
         if (searchId.trim() !== "") {
-            temp = temp.filter((s) => s._id.includes(searchId.trim()));
+            temp = students.filter((s) => s._id.includes(searchId.trim()));
         }
-
-        setFilteredStaff(temp);
-    }, [staff, searchId, filterRole]);
+        setFilteredStudents(temp);
+        setPage(0); // reset page when filtering
+    }, [students, searchId]);
 
     const handleCopy = (id: string) => {
         navigator.clipboard.writeText(id);
@@ -50,22 +52,21 @@ const StaffTable: React.FC = () => {
     };
 
     const handleDelete = async (id: string) => {
-        if (!window.confirm("هل أنت متأكد من حذف هذا الموظف؟")) return;
+        if (!window.confirm("هل أنت متأكد من حذف هذا الطالب؟")) return;
         try {
-            await deleteStaff(id);
-            setStaff((prev) => prev.filter((x) => x._id !== id));
+            await deleteStudent(id);
+            setStudents((prev) => prev.filter((s) => s._id !== id));
         } catch {
-            setError("فشل حذف الموظف");
+            setError("فشل حذف الطالب");
         }
     };
 
-    useEffect(() => {
-        loadStaff();
-    }, []);
+    // Pagination slice
+    const pagedStudents = filteredStudents.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
     return (
         <div className="dashboard-container">
-            <h2>جدول الموظفين</h2>
+            <h2>جدول الطلاب</h2>
             {error && <p className="error">{error}</p>}
 
             {/* Back button */}
@@ -76,7 +77,7 @@ const StaffTable: React.FC = () => {
                 العودة إلى لوحة الإدارة
             </button>
 
-            {/* Top filter/search bar */}
+            {/* Search by ID */}
             <div style={{ display: "flex", gap: "12px", marginBottom: "16px", flexWrap: "wrap" }}>
                 <input
                     type="text"
@@ -85,36 +86,26 @@ const StaffTable: React.FC = () => {
                     onChange={(e) => setSearchId(e.target.value)}
                     style={{ padding: "8px", flex: "1 1 200px" }}
                 />
-                <select
-                    value={filterRole}
-                    onChange={(e) => setFilterRole(e.target.value as keyof typeof ROLES | "all")}
-                    style={{ padding: "8px", flex: "0 0 150px" }}
-                >
-                    <option value="all">الكل</option>
-                    {Object.entries(ROLES).map(([v, l]) => (
-                        <option key={v} value={v}>
-                            {l}
-                        </option>
-                    ))}
-                </select>
             </div>
 
             <table className="staff-table">
                 <thead>
                 <tr>
+                    <th>كود الطالب</th>
                     <th>الإسم</th>
                     <th>الإيميل</th>
-                    <th>الرتبة</th>
+                    <th>المعدل التراكمى</th>
                     <th>نسخ ID</th>
                     <th>حذف</th>
                 </tr>
                 </thead>
                 <tbody>
-                {filteredStaff.map((s) => (
+                {pagedStudents.map((s) => (
                     <tr key={s._id}>
+                        <td>{s.studentId}</td>
                         <td>{s.name}</td>
                         <td>{s.email}</td>
-                        <td>{ROLES[s.role]}</td>
+                        <td>{s.gpa}</td>
                         <td>
                             <button
                                 className="copy-btn"
@@ -135,8 +126,11 @@ const StaffTable: React.FC = () => {
                 ))}
                 </tbody>
             </table>
+
+            {/* Pagination */}
+            <Pagination page={page} setPage={setPage} total={filteredStudents.length} />
         </div>
     );
 };
 
-export default StaffTable;
+export default StudentsTable;
